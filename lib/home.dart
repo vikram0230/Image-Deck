@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'constants.dart';
 
 class Home extends StatefulWidget {
   static String id = '/';
@@ -10,8 +10,10 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   List<Widget> homeWidgets = [];
   String dropdownValue = '2';
+  final _formKey = GlobalKey<FormState>();
 
   void getInitialWidgets(){
+    homeWidgets = [];
     homeWidgets.add(
       Center(
         child: Padding(
@@ -57,23 +59,7 @@ class _HomeState extends State<Home> {
   void getTextFields(folderCount){
     for(int i = 1; i <= folderCount; i++){
       homeWidgets.add(
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextField(
-                cursorColor: Colors.white,
-                onChanged: (value){},
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.white,
-                      )
-                  ),
-                  labelText: 'Folder $i',
-                ),
-              ),
-            ),
-          )
+          CustomTextField()
       );
     }
   }
@@ -95,8 +81,14 @@ class _HomeState extends State<Home> {
           ),
         ),
       ),
-      body: ListView(
-        children: homeWidgets,
+      body: Form(
+        key: _formKey,
+        child: ListView.builder(
+          itemCount: homeWidgets.length,
+          itemBuilder: (BuildContext context, int index){
+            return homeWidgets[index];
+          }
+        ),
       )
     );
   }
