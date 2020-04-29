@@ -12,6 +12,7 @@ class Classy extends StatefulWidget {
 
 class _ClassyState extends State<Classy> {
   dynamic _image;
+  List<String> folderNames = [];
   List<Widget> folders = [];
 
   Future getImage() async {
@@ -22,49 +23,15 @@ class _ClassyState extends State<Classy> {
   }
 
   void getFolders(){
-    folders = [];
     final FolderNameArguments args = ModalRoute.of(context).settings.arguments;
-    if(args.f1 != null){
-      folders.add(FolderButton(
-          folderName: args.f1,
+    folderNames = args.folderNames;
+    for(String i in folderNames){
+      folders.add(
+        FolderButton(
+          folderName: i,
         ),
       );
-      if(args.f2 != null){
-        folders.add(FolderButton(
-          folderName: args.f2,
-        ),
-        );
-        if(args.f3 != null){
-          folders.add(FolderButton(
-            folderName: args.f3,
-          ),
-          );
-          if(args.f4 != null){
-            folders.add(FolderButton(
-              folderName: args.f4,
-            ),
-            );
-            if(args.f5 != null){
-              folders.add(FolderButton(
-                folderName: args.f5,
-              ),
-              );
-              if(args.f6 != null){
-                folders.add(FolderButton(
-                  folderName: args.f6,
-                ),
-                );
-              }
-            }
-          }
-        }
-      }
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
   }
 
   @override
@@ -84,22 +51,21 @@ class _ClassyState extends State<Classy> {
       ),
       bottomNavigationBar: Container(
         height: 90,
-        child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            physics: BouncingScrollPhysics(),
-            itemCount: folders.length,
-            itemBuilder: (BuildContext context, int index){
-              return folders[index];
-            }
-        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: folders,
+        )
       ),
     );
   }
 }
 
-
-
 //ListView.builder(
-//itemCount: null,
-//itemBuilder: null,
+//scrollDirection: Axis.horizontal,
+//physics: BouncingScrollPhysics(),
+//itemCount: folders.length,
+//itemBuilder: (BuildContext context, int index){
+//return folders[index];
+//}
 //),
+

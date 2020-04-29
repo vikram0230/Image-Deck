@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 
 class CustomTextField extends StatelessWidget {
-//  CustomTextField({});
   String folderName;
 
   @override

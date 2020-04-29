@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'Widgets/customTextField.dart';
+import 'package:path_provider/path_provider.dart';
 import 'constants.dart';
 import 'classy.dart';
+import 'Widgets/directoryOperations.dart';
+import 'dart:io';
 
 class Home extends StatefulWidget {
   static String id = '/';
@@ -10,8 +13,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<Widget> homeWidgets = [CustomTextField()];
+  List<CustomTextField> homeWidgets = [CustomTextField()];
   String dropdownValue = '1';
+  List<String> folderNames = [];
 
   void getTextFields(folderCount){
     homeWidgets = [CustomTextField()];
@@ -65,13 +69,12 @@ class _HomeState extends State<Home> {
                         getTextFields(int.parse(dropdownValue));
                       });
                     },
-                    items: <String>['1','2','3','4','5','6'].map<DropdownMenuItem<String>>((String value) {
+                    items: <String>['1','2','3','4'].map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
                         child: Text(
                           value,
                           style: TextStyle(fontSize: 25),
-//                          textAlign: TextAlign.center,
                         ),
                       );
                     }).toList(),
@@ -92,18 +95,41 @@ class _HomeState extends State<Home> {
         ],
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10.0,horizontal: 100.0),
+        padding: const EdgeInsets.symmetric(vertical: 50.0,horizontal: 100.0),
         child: FlatButton(
           padding: EdgeInsets.symmetric(vertical: 15.0,horizontal: 10.0),
-          onPressed: (){
+          onPressed: () async {
+            folderNames = [];
+            for(CustomTextField i in homeWidgets){
+              folderNames.add(i.folderName);
+            }
+            print(folderNames);
+            // TODO: Show error message if null
+
+            // File System
+            DirectoryOperations.createAppDirectory();
+
+            for(String i in folderNames){
+              DirectoryOperations.createDirectory('/Image Deck/'+i);
+            }
+
+//            Directory('Vikram').create()
+//            // The created directory is returned as a Future.
+//                .then((Directory directory) {
+//              print(directory.path);
+//            });
+
+//            Directory appDocDirectory = await getExternalStorageDirectory();
+//            print(appDocDirectory);
+
+//            new Directory(appDocDirectory.path+'/'+'dir').create(recursive: true)
+//                .then((Directory directory) {
+//              print('Path of New Dir: '+directory.path);
+//            });
+
             Navigator.pushNamed(context, Classy.id,
               arguments: FolderNameArguments(
-                f1: 'Folder 1',
-                f2: 'Folder 2',
-                f3: 'Folder 3',
-                f4: 'Folder 4',
-                f5: 'Folder 5',
-                f6: 'Folder 6',
+                folderNames: folderNames,
               ),
             );
           },

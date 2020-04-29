@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class FolderButton extends StatelessWidget {
   FolderButton({this.folderName});
-  String folderName;
+  final String folderName;
 
   @override
   Widget build(BuildContext context) {
