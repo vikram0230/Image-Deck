@@ -1,6 +1,6 @@
 # Image-Deck
 
-##Image Classifier
+## Image Classifier
 
 Android application: Image classifier built using Flutter. 
 
