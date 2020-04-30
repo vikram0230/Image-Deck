@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:directory_picker/directory_picker.dart';
 import 'dart:async';
 
 class DirectoryOperations{
@@ -9,13 +11,16 @@ class DirectoryOperations{
 
     final Directory _appDocDir = await getExternalStorageDirectory();
     //App Document Directory + folder name
-    final Directory _appDocDirFolder =  Directory('${_appDocDir.path}/$folderName/');
+    final Directory _appDocDirFolder =  Directory('${_appDocDir.path}/');
 
-    if(await _appDocDirFolder.exists()){ //if folder already exists return path
+    if(await _appDocDirFolder.exists()){
+      //if folder already exists return path
+      print('Folder already exists: ${_appDocDir.path}/$folderName/');
       return _appDocDirFolder.path;
     }
     else{//if folder not exists create folder and then return its path
       final Directory _appDocDirNewFolder = await _appDocDirFolder.create(recursive: true);
+      print('Folder Created: ${_appDocDir.path}/$folderName/');
       return _appDocDirNewFolder.path;
     }
   }
@@ -26,12 +31,31 @@ class DirectoryOperations{
     //App Document Directory + folder name
     final Directory _appDocDirFolder =  Directory('${_appDocDir.path}/$folderName/');
 
-    if(await _appDocDirFolder.exists()){ //if folder already exists return path
+    if(await _appDocDirFolder.exists()){
+      //if folder already exists return path
+      print('Folder already exists: ${_appDocDir.path}$folderName/');
       return _appDocDirFolder.path;
     }
     else{//if folder not exists create folder and then return its path
       final Directory _appDocDirNewFolder = await _appDocDirFolder.create(recursive: true);
+      print('Folder Created: ${_appDocDir.path}$folderName/');
       return _appDocDirNewFolder.path;
     }
+  }
+
+  Directory selectedDirectory;
+  Future<void> _pickDirectory(BuildContext context) async {
+    Directory directory = selectedDirectory;
+    if (directory == null) {
+      directory = await getExternalStorageDirectory();
+    }
+
+    Directory newDirectory = await DirectoryPicker.pick(
+        allowFolderCreation: true,
+        context: context,
+        rootDirectory: directory,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10))));
+    selectedDirectory = newDirectory;
   }
 }

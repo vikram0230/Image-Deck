@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
   String folderName;
+  var textController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    textController.clear();
     return Padding(
       padding: const EdgeInsets.all(15.0),
       child: TextField(
+        controller: textController,
         onChanged: (value){
           folderName = value;
         },
@@ -25,7 +28,7 @@ class CustomTextField extends StatelessWidget {
               color: Colors.black
             )
           ),
-          labelText: 'Enter Folder Name',
+          labelText: 'Folder Name',
           labelStyle: TextStyle(color: Colors.black54)
         ),
         textCapitalization: TextCapitalization.words,
