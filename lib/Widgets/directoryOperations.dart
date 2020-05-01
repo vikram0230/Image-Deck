@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:directory_picker/directory_picker.dart';
+import 'package:path/path.dart' as path;
 import 'dart:async';
 
 class DirectoryOperations{
@@ -29,7 +30,7 @@ class DirectoryOperations{
 
     final Directory _appDocDir = await getExternalStorageDirectory();
     //App Document Directory + folder name
-    final Directory _appDocDirFolder =  Directory('${_appDocDir.path}/$folderName/');
+    final Directory _appDocDirFolder = Directory(path.join(_appDocDir.path,folderName));
 
     if(await _appDocDirFolder.exists()){
       //if folder already exists return path
@@ -43,8 +44,7 @@ class DirectoryOperations{
     }
   }
 
-  Directory selectedDirectory;
-  Future<void> _pickDirectory(BuildContext context) async {
+  static Future<String> pickDirectory(BuildContext context, Directory selectedDirectory) async {
     Directory directory = selectedDirectory;
     if (directory == null) {
       directory = await getExternalStorageDirectory();
@@ -57,5 +57,7 @@ class DirectoryOperations{
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(10))));
     selectedDirectory = newDirectory;
+    print(selectedDirectory.path);
+    return selectedDirectory.path;
   }
 }

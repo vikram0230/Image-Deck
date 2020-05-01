@@ -1,5 +1,8 @@
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:image_deck/Widgets/directoryOperations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:directory_picker/directory_picker.dart';
 import 'Widgets/folderButton.dart';
@@ -48,8 +51,11 @@ class _ClassyState extends State<Classy> {
         backgroundColor: Colors.black,
       ),
       body: FlatButton(
-        onPressed: (){
+        onPressed: () async {
           print('button pressed');
+//          Directory _appDocDir = await getExternalStorageDirectory();
+          String selectedDirectory = DirectoryOperations.pickDirectory(context, Directory('/storage/emulated/0/')).toString();
+          print(selectedDirectory);
         },
         child: Container(
           child: Center(
