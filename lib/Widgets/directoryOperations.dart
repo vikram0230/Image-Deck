@@ -44,20 +44,21 @@ class DirectoryOperations{
     }
   }
 
-  static Future<String> pickDirectory(BuildContext context, Directory selectedDirectory) async {
-    Directory directory = selectedDirectory;
-    if (directory == null) {
-      directory = await getExternalStorageDirectory();
+  static Future<String> pickDirectory(BuildContext context, Directory parentDirectory) async {
+    Directory selectedDirectory;
+    if (parentDirectory == null) {
+      parentDirectory = await getExternalStorageDirectory();
     }
 
     Directory newDirectory = await DirectoryPicker.pick(
         allowFolderCreation: true,
         context: context,
-        rootDirectory: directory,
+        rootDirectory: parentDirectory,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(10))));
     selectedDirectory = newDirectory;
     print(selectedDirectory.path);
+
     return selectedDirectory.path;
   }
 }

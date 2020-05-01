@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'package:image_deck/Widgets/directoryOperations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:directory_picker/directory_picker.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'Widgets/folderButton.dart';
 import 'constants.dart';
 
@@ -20,10 +21,19 @@ class _ClassyState extends State<Classy> {
   List<Widget> folders = [];
 
   Future getImage() async {
-    var image = await ImagePicker.pickImage(source: ImageSource.camera);
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
     setState(() {
       _image = image;
     });
+    Navigator.of(context).pop();
+  }
+
+  void getImageList() async {
+    List<AssetPathEntity> list = await PhotoManager.getAssetPathList();
+    print('got images');
+    for(var i in list){
+      print(i.toString());
+    }
   }
 
   void getFolders(){
@@ -50,36 +60,41 @@ class _ClassyState extends State<Classy> {
         ),
         backgroundColor: Colors.black,
       ),
-      body: FlatButton(
-        onPressed: () async {
-          print('button pressed');
-//          Directory _appDocDir = await getExternalStorageDirectory();
-          String selectedDirectory = DirectoryOperations.pickDirectory(context, Directory('/storage/emulated/0/')).toString();
-          print(selectedDirectory);
-        },
-        child: Container(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Icon(
-                    Icons.add_circle_outline,
-                    size: 100,
-                    color: Colors.black26,
+      body: Center(
+        child: _image == null
+            ? FlatButton(
+          onPressed: () async {
+            print('button pressed');
+  //          Directory _appDocDir = await getExternalStorageDirectory();
+//            String selectedDirectory = DirectoryOperations.pickDirectory(context, Directory('/storage/emulated/0/')).toString();
+//            print(selectedDirectory);
+//            getImage();
+            getImageList();
+          },
+          child: Container(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Icon(
+                      Icons.add_circle_outline,
+                      size: 100,
+                      color: Colors.black26,
+                    ),
                   ),
-                ),
-                Text(
-                  'Tap to add Images',
-                  style: TextStyle(
-                    color: Colors.black38,
+                  Text(
+                    'Tap to add Images',
+                    style: TextStyle(
+                      color: Colors.black38,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
+        ): Image.file(_image),
       ),
       bottomNavigationBar: Container(
         height: 90,
@@ -102,9 +117,5 @@ class _ClassyState extends State<Classy> {
 //),
 
 
-//Center(
-//child: _image == null
-//? Text('No image selected.')
-//: Image.file(_image),
-//),
+
 
