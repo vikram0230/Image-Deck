@@ -7,10 +7,30 @@ import 'package:image_picker/image_picker.dart';
 import 'package:directory_picker/directory_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'Widgets/folderButton.dart';
+import 'Provider/asset_provider.dart';
+import 'package:image_deck/Provider/config_provider.dart';
+import 'options.dart';
 import 'constants.dart';
+import 'dart:async';
+import 'dart:typed_data';
 
 class Classy extends StatefulWidget {
   static String id = 'classy';
+
+  final List<AssetEntity> list;
+  final int initIndex;
+  final bool isPreview = true;
+//  final PhotoPreviewResult result;
+//  final AssetProvider assetProvider;
+
+
+  Classy({
+    this.list,
+    this.initIndex,
+//    this.result,
+//    this.assetProvider,
+  });
+
   @override
   _ClassyState createState() => _ClassyState();
 }
@@ -19,6 +39,19 @@ class _ClassyState extends State<Classy> {
   dynamic _image;
   List<String> folderNames = [];
   List<Widget> folders = [];
+
+  PhotoPickerProvider get config => PhotoPickerProvider.of(context);
+  AssetProvider get assetProvider => ;
+  Options get options => config.options;
+  PageController pageController;
+  List<AssetEntity> get list {
+    if (!widget.isPreview) {
+      return assetProvider.data;
+    }
+    return widget.list;
+  }
+  StreamController<int> pageChangeController = StreamController.broadcast();
+  Stream<int> get pageStream => pageChangeController.stream;
 
   Future getImage() async {
     var image = await ImagePicker.pickImage(source: ImageSource.gallery);
@@ -29,9 +62,14 @@ class _ClassyState extends State<Classy> {
   }
 
   void getImageList() async {
-    List<AssetPathEntity> list = await PhotoManager.getAssetPathList();
+    List<AssetPathEntity> photoList = await PhotoManager.getAssetPathList(type: RequestType.image);
+    List<AssetPathEntity> videoList = await PhotoManager.getAssetPathList(type: RequestType.video);
     print('got images');
-    for(var i in list){
+    for(var i in photoList){
+      print(i.toString());
+    }
+    print('\n\n');
+    for(var i in videoList){
       print(i.toString());
     }
   }
@@ -51,8 +89,24 @@ class _ClassyState extends State<Classy> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    pageController = PageController(
+      initialPage: widget.initIndex,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     getFolders();
+
+    int totalCount = assetProvider.current.assetCount ?? 0;
+    if (!widget.isPreview) {
+      totalCount = assetProvider.current.assetCount;
+    } else {
+      totalCount = list.length;
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Image Deck",
@@ -94,7 +148,12 @@ class _ClassyState extends State<Classy> {
               ),
             ),
           ),
-        ): Image.file(_image),
+        ): PageView.builder(
+          controller: pageController,
+          itemBuilder: _buildItem,
+          itemCount: totalCount,
+          onPageChanged: _onPageChanged,
+        ),
       ),
       bottomNavigationBar: Container(
         height: 90,
@@ -105,7 +164,91 @@ class _ClassyState extends State<Classy> {
       ),
     );
   }
+
+  Future<void> _loadMore() async {
+    assetProvider.loadMore();
+  }
+
+  void changeSelected(AssetEntity entity, int index) {
+    var itemIndex = list.indexOf(entity);
+    if (itemIndex != -1) pageController.jumpToPage(itemIndex);
+  }
+
+  void _onPageChanged(int value) {
+    pageChangeController.add(value);
+  }
+
+  Widget _buildLoadingWidget(AssetEntity entity) {
+    return options.loadingDelegate.buildBigImageLoading(context, entity, Colors.black);
+  }
+
+
+
+  Widget _buildItem(BuildContext context, int index) {
+    if (!widget.isPreview && index >= list.length - 5) {
+      _loadMore();
+    }
+
+    var data = list[index];
+    return BigPhotoImage(
+      assetEntity: data,
+      loadingWidget: _buildLoadingWidget(data),
+    );
+  }
 }
+
+class BigPhotoImage extends StatefulWidget {
+  final AssetEntity assetEntity;
+  final Widget loadingWidget;
+
+  const BigPhotoImage({
+    Key key,
+    this.assetEntity,
+    this.loadingWidget,
+  }) : super(key: key);
+
+  @override
+  _BigPhotoImageState createState() => _BigPhotoImageState();
+}
+
+class _BigPhotoImageState extends State<BigPhotoImage>
+    with AutomaticKeepAliveClientMixin {
+  Widget get loadingWidget {
+    return widget.loadingWidget ?? Container();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    var width = MediaQuery.of(context).size.width;
+    var height = MediaQuery.of(context).size.height;
+    return FutureBuilder(
+      future:
+      widget.assetEntity.thumbDataWithSize(width.floor(), height.floor()),
+      builder: (BuildContext context, AsyncSnapshot<Uint8List> snapshot) {
+        var file = snapshot.data;
+        if (snapshot.connectionState == ConnectionState.done && file != null) {
+          print(file.length);
+          return Image.memory(
+            file,
+            fit: BoxFit.contain,
+            width: double.infinity,
+            height: double.infinity,
+          );
+        }
+        return loadingWidget;
+      },
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+}
+
+class PhotoPreviewResult {
+  List<AssetEntity> previewSelectedList = [];
+}
+
 
 //ListView.builder(
 //scrollDirection: Axis.horizontal,
