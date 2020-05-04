@@ -4,19 +4,31 @@ import 'package:photo_manager/photo_manager.dart';
 class AssetProvider {
   Map<AssetPathEntity, AssetPaging> _dataMap = {};
 
-  AssetPathEntity _current;
+  AssetPathEntity current;
 
-  AssetPathEntity get current => _current;
+  AssetPathEntity get _current => current;
 
-  set current(AssetPathEntity current) {
-    _current = current;
-    if (_dataMap[current] == null) {
-      final paging = AssetPaging(current);
-      _dataMap[current] = paging;
+//  set _current(AssetPathEntity _current) {
+//    current = _current;
+//    print(_dataMap[_current].toString());
+//    if (_dataMap[_current] == null) {
+//      final paging = AssetPaging(_current);
+//      print('called Asset paging');
+//      _dataMap[_current] = paging;
+//    }
+//  }
+
+  AssetPaging getPaging(){
+    if (_dataMap[_current] == null) {
+      print(_current.toString());
+      final paging = AssetPaging(_current);
+      print('called Asset paging');
+      _dataMap[_current] = paging;
     }
+    return _dataMap[_current];
   }
 
-  List<AssetEntity> get data => _dataMap[current]?.data ?? [];
+  List<AssetEntity> get data => _dataMap[_current]?.data ?? [];
 
   Future<void> loadMore() async {
     final paging = getPaging();
@@ -25,7 +37,7 @@ class AssetProvider {
     }
   }
 
-  AssetPaging getPaging() => _dataMap[current];
+//  AssetPaging getPaging() => _dataMap[_current];
 
   bool get noMore => getPaging()?.noMore ?? false;
 
@@ -49,6 +61,7 @@ class AssetPaging {
     if (noMore == true) {
       return;
     }
+    print(this.path.toString());
     var data = await path.getAssetListPaged(page, pageCount);
     if (data.length == 0) {
       noMore = true;

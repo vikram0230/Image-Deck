@@ -1,10 +1,10 @@
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+//import 'dart:io';
+//import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:image_deck/Widgets/directoryOperations.dart';
+//import 'package:image_deck/Widgets/directoryOperations.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:directory_picker/directory_picker.dart';
+//import 'package:directory_picker/directory_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'Widgets/folderButton.dart';
 import 'Provider/asset_provider.dart';
@@ -18,7 +18,7 @@ class Classy extends StatefulWidget {
   static String id = 'classy';
 
   final List<AssetEntity> list;
-  final int initIndex;
+//  final int initIndex;
   final bool isPreview = true;
 //  final PhotoPreviewResult result;
 //  final AssetProvider assetProvider;
@@ -26,7 +26,7 @@ class Classy extends StatefulWidget {
 
   Classy({
     this.list,
-    this.initIndex,
+//    this.initIndex,
 //    this.result,
 //    this.assetProvider,
   });
@@ -41,17 +41,15 @@ class _ClassyState extends State<Classy> {
   List<Widget> folders = [];
 
   PhotoPickerProvider get config => PhotoPickerProvider.of(context);
-  AssetProvider get assetProvider => ;
+  AssetProvider get assetProvider => AssetProvider();
   Options get options => config.options;
   PageController pageController;
-  List<AssetEntity> get list {
-    if (!widget.isPreview) {
-      return assetProvider.data;
-    }
-    return widget.list;
-  }
+//  List<AssetEntity> get list {
+//    return assetProvider.data;
+//  }
   StreamController<int> pageChangeController = StreamController.broadcast();
   Stream<int> get pageStream => pageChangeController.stream;
+  List<AssetEntity> list;
 
   Future getImage() async {
     var image = await ImagePicker.pickImage(source: ImageSource.gallery);
@@ -72,6 +70,17 @@ class _ClassyState extends State<Classy> {
     for(var i in videoList){
       print(i.toString());
     }
+
+    if (photoList.isNotEmpty) {
+      print('images passed to asset provider with ' + photoList[0].toString());
+      assetProvider.current = photoList[0];
+      await assetProvider.loadMore();
+      print('images loaded');
+      assetProvider.getPaging();
+      print('paging done');
+    }
+    list = assetProvider.data;
+    print('$list');
   }
 
   void getFolders(){
@@ -91,20 +100,18 @@ class _ClassyState extends State<Classy> {
   @override
   void initState() {
     super.initState();
-    pageController = PageController(
-      initialPage: widget.initIndex,
-    );
+    pageController = PageController();
   }
 
   @override
   Widget build(BuildContext context) {
     getFolders();
 
-    int totalCount = assetProvider.current.assetCount ?? 0;
+    int totalCount = assetProvider.current?.assetCount ?? 0;
     if (!widget.isPreview) {
       totalCount = assetProvider.current.assetCount;
     } else {
-      totalCount = list.length;
+      totalCount = list?.length;
     }
 
     return Scaffold(
@@ -115,8 +122,9 @@ class _ClassyState extends State<Classy> {
         backgroundColor: Colors.black,
       ),
       body: Center(
-        child: _image == null
-            ? FlatButton(
+        child:
+        _image == null ?
+        FlatButton(
           onPressed: () async {
             print('button pressed');
   //          Directory _appDocDir = await getExternalStorageDirectory();
@@ -148,7 +156,8 @@ class _ClassyState extends State<Classy> {
               ),
             ),
           ),
-        ): PageView.builder(
+        ):
+        PageView.builder(
           controller: pageController,
           itemBuilder: _buildItem,
           itemCount: totalCount,
@@ -169,11 +178,6 @@ class _ClassyState extends State<Classy> {
     assetProvider.loadMore();
   }
 
-  void changeSelected(AssetEntity entity, int index) {
-    var itemIndex = list.indexOf(entity);
-    if (itemIndex != -1) pageController.jumpToPage(itemIndex);
-  }
-
   void _onPageChanged(int value) {
     pageChangeController.add(value);
   }
@@ -181,8 +185,6 @@ class _ClassyState extends State<Classy> {
   Widget _buildLoadingWidget(AssetEntity entity) {
     return options.loadingDelegate.buildBigImageLoading(context, entity, Colors.black);
   }
-
-
 
   Widget _buildItem(BuildContext context, int index) {
     if (!widget.isPreview && index >= list.length - 5) {
