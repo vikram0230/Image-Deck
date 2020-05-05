@@ -39,6 +39,7 @@ class _ClassyState extends State<Classy> {
   dynamic _image;
   List<String> folderNames = [];
   List<Widget> folders = [];
+  List<AssetPathEntity> photoList;
 
   PhotoPickerProvider get config => PhotoPickerProvider.of(context);
   AssetProvider get assetProvider => AssetProvider();
@@ -60,7 +61,7 @@ class _ClassyState extends State<Classy> {
   }
 
   void getImageList() async {
-    List<AssetPathEntity> photoList = await PhotoManager.getAssetPathList(type: RequestType.image);
+    photoList = await PhotoManager.getAssetPathList(type: RequestType.image);
     List<AssetPathEntity> videoList = await PhotoManager.getAssetPathList(type: RequestType.video);
     print('got images');
     for(var i in photoList){
@@ -72,15 +73,16 @@ class _ClassyState extends State<Classy> {
     }
 
     if (photoList.isNotEmpty) {
-      print('images passed to asset provider with ' + photoList[0].toString());
+//      print('images passed to asset provider with ' + photoList[0].toString());
       assetProvider.current = photoList[0];
-      await assetProvider.loadMore();
-      print('images loaded');
-      assetProvider.getPaging();
-      print('paging done');
+      list = await assetProvider.loadMore(photoList[0]);
+//      print('images loaded');
+//      AssetPaging pagedAssets = assetProvider.getPaging();
+//      print(pagedAssets.toString());
+//      print('paging done');
     }
-    list = assetProvider.data;
-    print('$list');
+//    list = assetProvider.getData();
+    print('List: '+list.length.toString());
   }
 
   void getFolders(){
@@ -158,7 +160,7 @@ class _ClassyState extends State<Classy> {
           ),
         ):
         PageView.builder(
-          controller: pageController,
+//          controller: pageController,
           itemBuilder: _buildItem,
           itemCount: totalCount,
           onPageChanged: _onPageChanged,
@@ -175,7 +177,7 @@ class _ClassyState extends State<Classy> {
   }
 
   Future<void> _loadMore() async {
-    assetProvider.loadMore();
+    assetProvider.loadMore(photoList[0]);
   }
 
   void _onPageChanged(int value) {
