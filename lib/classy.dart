@@ -50,7 +50,7 @@ class _ClassyState extends State<Classy> {
 //  }
   StreamController<int> pageChangeController = StreamController.broadcast();
   Stream<int> get pageStream => pageChangeController.stream;
-  List<AssetEntity> list;
+  List<AssetEntity> list = [];
 
   Future getImage() async {
     var image = await ImagePicker.pickImage(source: ImageSource.gallery);
@@ -75,14 +75,16 @@ class _ClassyState extends State<Classy> {
     if (photoList.isNotEmpty) {
 //      print('images passed to asset provider with ' + photoList[0].toString());
       assetProvider.current = photoList[0];
-      list = await assetProvider.loadMore(photoList[0]);
+      list = await _loadMore();
+      print('List: '+list.length.toString());
+//      list = await assetProvider.loadMore(photoList[0]);
 //      print('images loaded');
 //      AssetPaging pagedAssets = assetProvider.getPaging();
 //      print(pagedAssets.toString());
 //      print('paging done');
     }
 //    list = assetProvider.getData();
-    print('List: '+list.length.toString());
+//
   }
 
   void getFolders(){
@@ -103,11 +105,13 @@ class _ClassyState extends State<Classy> {
   void initState() {
     super.initState();
     pageController = PageController();
+//    getImageList();
   }
 
   @override
   Widget build(BuildContext context) {
     getFolders();
+    getImageList();
 
     int totalCount = assetProvider.current?.assetCount ?? 0;
     if (!widget.isPreview) {
@@ -115,6 +119,7 @@ class _ClassyState extends State<Classy> {
     } else {
       totalCount = list?.length;
     }
+    print('total count: ' + totalCount.toString());
 
     return Scaffold(
       appBar: AppBar(
@@ -125,45 +130,45 @@ class _ClassyState extends State<Classy> {
       ),
       body: Center(
         child:
-        _image == null ?
-        FlatButton(
-          onPressed: () async {
-            print('button pressed');
-  //          Directory _appDocDir = await getExternalStorageDirectory();
-//            String selectedDirectory = DirectoryOperations.pickDirectory(context, Directory('/storage/emulated/0/')).toString();
-//            print(selectedDirectory);
-//            getImage();
-            getImageList();
-          },
-          child: Container(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Icon(
-                      Icons.add_circle_outline,
-                      size: 100,
-                      color: Colors.black26,
-                    ),
-                  ),
-                  Text(
-                    'Tap to add Images',
-                    style: TextStyle(
-                      color: Colors.black38,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ):
+//        _image == null ?
+//        FlatButton(
+//          onPressed: () async {
+//            print('button pressed');
+//  //          Directory _appDocDir = await getExternalStorageDirectory();
+////            String selectedDirectory = DirectoryOperations.pickDirectory(context, Directory('/storage/emulated/0/')).toString();
+////            print(selectedDirectory);
+////            getImage();
+//            getImageList();
+//          },
+//          child: Container(
+//            child: Center(
+//              child: Column(
+//                mainAxisAlignment: MainAxisAlignment.center,
+//                children: <Widget>[
+//                  Padding(
+//                    padding: const EdgeInsets.all(15.0),
+//                    child: Icon(
+//                      Icons.add_circle_outline,
+//                      size: 100,
+//                      color: Colors.black26,
+//                    ),
+//                  ),
+//                  Text(
+//                    'Tap to add Images',
+//                    style: TextStyle(
+//                      color: Colors.black38,
+//                    ),
+//                  ),
+//                ],
+//              ),
+//            ),
+//          ),
+//        ):
         PageView.builder(
 //          controller: pageController,
           itemBuilder: _buildItem,
           itemCount: totalCount,
-          onPageChanged: _onPageChanged,
+//          onPageChanged: _onPageChanged,
         ),
       ),
       bottomNavigationBar: Container(
@@ -176,8 +181,8 @@ class _ClassyState extends State<Classy> {
     );
   }
 
-  Future<void> _loadMore() async {
-    assetProvider.loadMore(photoList[0]);
+  Future<List<AssetEntity>> _loadMore() async {
+    return assetProvider.loadMore(photoList[0]);
   }
 
   void _onPageChanged(int value) {
@@ -189,10 +194,11 @@ class _ClassyState extends State<Classy> {
   }
 
   Widget _buildItem(BuildContext context, int index) {
-    if (!widget.isPreview && index >= list.length - 5) {
-      _loadMore();
-    }
-
+//    if (!widget.isPreview && index >= list.length - 5) {
+//      _loadMore();
+//    }
+//    list = assetProvider.getData();
+    print('List: '+list?.length.toString());
     var data = list[index];
     return BigPhotoImage(
       assetEntity: data,

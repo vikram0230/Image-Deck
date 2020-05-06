@@ -110,7 +110,7 @@ class _HomeState extends State<Home> {
             DirectoryOperations.createAppDirectory();
 
             for(String i in folderNames){
-              DirectoryOperations.createDirectory('/Image Deck/'+i);
+              DirectoryOperations.createDirectory('Image Deck/'+i);
             }
 
 //            Directory('Vikram').create()
