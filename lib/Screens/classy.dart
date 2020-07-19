@@ -63,9 +63,9 @@ class _ClassyState extends State<Classy> {
 
   editCallback() {
     setState(() {
-      _pageController.nextPage(
-          duration: Duration(milliseconds: 100), curve: Curves.bounceOut);
       images.removeAt(_pageController.page.round());
+//      _pageController.nextPage(
+//          duration: Duration(milliseconds: 100), curve: Curves.bounceOut);
     });
   }
 
