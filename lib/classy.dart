@@ -16,19 +16,13 @@ import 'dart:typed_data';
 class Classy extends StatefulWidget {
   static String id = 'classy';
 
-  final List<AssetEntity> list;
 //  final int initIndex;
   final bool isPreview = true;
 //  final PhotoPreviewResult result;
 //  final AssetProvider assetProvider;
 
 
-  Classy({
-    this.list,
-//    this.initIndex,
-//    this.result,
-//    this.assetProvider,
-  });
+
 
   @override
   _ClassyState createState() => _ClassyState();
@@ -41,7 +35,8 @@ class _ClassyState extends State<Classy> {
   List<AssetPathEntity> photoList;
 
   PhotoPickerProvider get config => PhotoPickerProvider.of(context);
-  AssetProvider get assetProvider => AssetProvider();
+//  AssetProvider get assetProvider => AssetProvider();
+  AssetProvider assetProvider = AssetProvider();
   Options get options => config.options;
   PageController pageController;
 //  List<AssetEntity> get list {
@@ -49,7 +44,7 @@ class _ClassyState extends State<Classy> {
 //  }
   StreamController<int> pageChangeController = StreamController.broadcast();
   Stream<int> get pageStream => pageChangeController.stream;
-  List<AssetEntity> list;
+  List<AssetEntity> list = [];
 
   Future getImage() async {
     var image = await ImagePicker.pickImage(source: ImageSource.gallery);
@@ -74,14 +69,16 @@ class _ClassyState extends State<Classy> {
     if (photoList.isNotEmpty) {
 //      print('images passed to asset provider with ' + photoList[0].toString());
       assetProvider.current = photoList[0];
-      list = await assetProvider.loadMore(photoList[0]);
+      list = await _loadMore();
+//      print('List: '+list.length.toString());
+//      list = await assetProvider.loadMore(photoList[0]);
 //      print('images loaded');
 //      AssetPaging pagedAssets = assetProvider.getPaging();
 //      print(pagedAssets.toString());
 //      print('paging done');
     }
 //    list = assetProvider.getData();
-    print('List: '+list.length.toString());
+//
   }
 
   void getFolders(){
@@ -101,12 +98,14 @@ class _ClassyState extends State<Classy> {
   @override
   void initState() {
     super.initState();
-    pageController = PageController();
+    pageController = PageController(initialPage: 0);
+//    getImageList();
   }
 
   @override
   Widget build(BuildContext context) {
     getFolders();
+    getImageList();
 
     int totalCount = assetProvider.current?.assetCount ?? 0;
     if (!widget.isPreview) {
@@ -114,6 +113,7 @@ class _ClassyState extends State<Classy> {
     } else {
       totalCount = list?.length;
     }
+    print('total count: ' + totalCount.toString());
 
     return Scaffold(
       appBar: AppBar(
@@ -122,48 +122,40 @@ class _ClassyState extends State<Classy> {
         ),
         backgroundColor: Colors.black,
       ),
-      body: Center(
-        child:
-        _image == null ?
-        FlatButton(
-          onPressed: () async {
-            print('button pressed');
-  //          Directory _appDocDir = await getExternalStorageDirectory();
-//            String selectedDirectory = DirectoryOperations.pickDirectory(context, Directory('/storage/emulated/0/')).toString();
-//            print(selectedDirectory);
-//            getImage();
-            getImageList();
-          },
-          child: Container(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Icon(
-                      Icons.add_circle_outline,
-                      size: 100,
-                      color: Colors.black26,
+      body: Column(
+        children: <Widget>[
+          Text('Hello'),
+          Expanded(
+            child: PageView.builder(
+//              controller: pageController,
+              itemBuilder: (BuildContext context, int index) {
+//    if (!widget.isPreview && index >= list.length - 5) {
+//      _loadMore();
+//    }
+//    list = assetProvider.getData();
+//                  print('hello');
+//                  print('List: '+list?.length.toString());
+                  var data = list[index];
+                return GestureDetector(
+                  onTap: (){
+                    print('button pressed');
+                  },
+                  child: Container(
+                    width: 200,
+                    height: 200,
+                    color: Colors.black38,
+                    child: BigPhotoImage(
+                      assetEntity: data,
+                      loadingWidget: _buildLoadingWidget(data),
                     ),
                   ),
-                  Text(
-                    'Tap to add Images',
-                    style: TextStyle(
-                      color: Colors.black38,
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
+//              itemCount: totalCount,
+//              onPageChanged: _onPageChanged,
             ),
           ),
-        ):
-        PageView.builder(
-//          controller: pageController,
-          itemBuilder: _buildItem,
-          itemCount: totalCount,
-          onPageChanged: _onPageChanged,
-        ),
+        ],
       ),
       bottomNavigationBar: Container(
         height: 90,
@@ -175,8 +167,8 @@ class _ClassyState extends State<Classy> {
     );
   }
 
-  Future<void> _loadMore() async {
-    assetProvider.loadMore(photoList[0]);
+  Future<List<AssetEntity>> _loadMore() async {
+    return assetProvider.loadMore(photoList[0]);
   }
 
   void _onPageChanged(int value) {
@@ -185,18 +177,6 @@ class _ClassyState extends State<Classy> {
 
   Widget _buildLoadingWidget(AssetEntity entity) {
     return options.loadingDelegate.buildBigImageLoading(context, entity, Colors.black);
-  }
-
-  Widget _buildItem(BuildContext context, int index) {
-    if (!widget.isPreview && index >= list.length - 5) {
-      _loadMore();
-    }
-
-    var data = list[index];
-    return BigPhotoImage(
-      assetEntity: data,
-      loadingWidget: _buildLoadingWidget(data),
-    );
   }
 }
 
@@ -226,12 +206,11 @@ class _BigPhotoImageState extends State<BigPhotoImage>
     var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
     return FutureBuilder(
-      future:
-      widget.assetEntity.thumbDataWithSize(width.floor(), height.floor()),
+      future: widget.assetEntity.thumbDataWithSize(width.floor(), height.floor()),
       builder: (BuildContext context, AsyncSnapshot<Uint8List> snapshot) {
         var file = snapshot.data;
         if (snapshot.connectionState == ConnectionState.done && file != null) {
-          print(file.length);
+          print('File length: '+file.length.toString());
           return Image.memory(
             file,
             fit: BoxFit.contain,
@@ -262,6 +241,41 @@ class PhotoPreviewResult {
 //}
 //),
 
+
+//_image == null ?
+//        FlatButton(
+//          onPressed: () async {
+//            print('button pressed');
+//  //          Directory _appDocDir = await getExternalStorageDirectory();
+////            String selectedDirectory = DirectoryOperations.pickDirectory(context, Directory('/storage/emulated/0/')).toString();
+////            print(selectedDirectory);
+////            getImage();
+//            getImageList();
+//          },
+//          child: Container(
+//            child: Center(
+//              child: Column(
+//                mainAxisAlignment: MainAxisAlignment.center,
+//                children: <Widget>[
+//                  Padding(
+//                    padding: const EdgeInsets.all(15.0),
+//                    child: Icon(
+//                      Icons.add_circle_outline,
+//                      size: 100,
+//                      color: Colors.black26,
+//                    ),
+//                  ),
+//                  Text(
+//                    'Tap to add Images',
+//                    style: TextStyle(
+//                      color: Colors.black38,
+//                    ),
+//                  ),
+//                ],
+//              ),
+//            ),
+//          ),
+//        ):
 
 
 

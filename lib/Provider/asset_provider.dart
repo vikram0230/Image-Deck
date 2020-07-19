@@ -30,10 +30,9 @@ class AssetProvider {
     return _dataMap[current];
   }
 
-
   List<AssetEntity> getData(){
-    print('Data: '+ paging?.data.toString());
-    return _dataMap[current]?.data ?? [];
+//    print('Data: '+ paging?.data.toString());
+    return paging.data;
   }
 
   Future<List<AssetEntity>> loadMore(current) async {
