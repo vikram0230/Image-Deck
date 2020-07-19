@@ -9,7 +9,6 @@ import 'package:photo_manager/photo_manager.dart';
 import 'Widgets/folderButton.dart';
 import 'Provider/asset_provider.dart';
 import 'package:image_deck/Provider/config_provider.dart';
-import 'options.dart';
 import 'constants.dart';
 import 'dart:async';
 import 'dart:typed_data';
